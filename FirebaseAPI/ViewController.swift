@@ -14,10 +14,15 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        /**
+         * EXAMPLES ON HOW TO USE FIREBASEUTILS QUERY METHODS
+         */
+        
+        // QUERYBYID example
         let ref = FIRDatabase.database().reference(withPath: "users")
         let firebaseUtils = FirebaseUtils()
         firebaseUtils.queryById(id: "1", ref: ref)
-        
     }
 
     override func didReceiveMemoryWarning() {
