@@ -18,25 +18,23 @@ class FirebaseUtils {
      * @params id (String), ref (FIRDatabaseReference), childType (AnyClass) // FIGURE OUT TYPE THING
      * @return JSON object with id as its parent
      */
-    func queryById(id : String, ref : FIRDatabaseReference) { // NEED TO FIGURE OUT TYPE THINGY
+    func queryById(id : String, ref : FIRDatabaseReference, withBlock: @escaping ([String: Any]) -> Void) { // NEED TO FIGURE OUT TYPE THINGY
         print(id)
-        print("TEST")
         print(ref)
         ref.child(id).observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            print(snapshot)
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
-            } else {
-                let returnVal = snapshot.value as! NSDictionary // NEED TO FIGURE OUT TYPE
-                print(returnVal)
-                // FIGURE OUT HOW TO RETURN RETURNVAL
+            if (snapshot.exists()) {
+                if let returnVal = snapshot.value as? [String: Any] {
+                    withBlock(returnVal)
+                }
             }
-        }) { (error) in
+        })
+        { (error) in
             print(error.localizedDescription)
         }
+        
     }
     
+    /*
     /**
      * queryByFieldContains: compares values for each FIELDNAME to see
      * they contain the given VALUE
@@ -238,4 +236,5 @@ class FirebaseUtils {
         }
         
     }
+    */
 }

@@ -8,6 +8,7 @@ target 'FirebaseAPI' do
   # Pods for FirebaseAPI
   pod ‘Firebase/Core’
   pod ‘Firebase/Database’
+  pod ‘Firebase/Auth’
 
   target 'FirebaseAPITests' do
     inherit! :search_paths

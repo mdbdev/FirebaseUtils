@@ -8,6 +8,8 @@
 
 import UIKit
 import Firebase
+import FirebaseAuth
+
 
 class ViewController: UIViewController {
 
@@ -19,10 +21,15 @@ class ViewController: UIViewController {
          * EXAMPLES ON HOW TO USE FIREBASEUTILS QUERY METHODS
          */
         
+        FIRAuth.auth()?.signIn(withEmail: "mudit@google.com", password: "fuckyou", completion: nil)
+        print("Sign in Successful!")
         // QUERYBYID example
         let ref = FIRDatabase.database().reference(withPath: "users")
         let firebaseUtils = FirebaseUtils()
-        firebaseUtils.queryById(id: "1", ref: ref)
+        let block = { dict -> Void in
+            print(dict)
+        }
+        firebaseUtils.queryById(id: "2", ref: ref, withBlock: block)
     }
 
     override func didReceiveMemoryWarning() {
