@@ -11,6 +11,11 @@ import Firebase
 
 class FirebaseUtils {
     
+    enum FirebaseUtilsError : Error {
+        case NotRelational
+        case QueryError
+    }
+    
     /** 
      * queryById 
      * - ASYNC
@@ -18,23 +23,24 @@ class FirebaseUtils {
      * @params id (String), ref (FIRDatabaseReference), childType (AnyClass) // FIGURE OUT TYPE THING
      * @return JSON object with id as its parent
      */
-    func queryById(id : String, ref : FIRDatabaseReference, withBlock: @escaping ([String: Any]) -> Void) { // NEED TO FIGURE OUT TYPE THINGY
-        print(id)
-        print(ref)
+    
+    func queryById(id : String, ref : FIRDatabaseReference, withBlock: @escaping (Any) -> Void) {
+        assertRef(ref: ref)
         ref.child(id).observeSingleEvent(of: .value, with: { (snapshot) in
             if (snapshot.exists()) {
-                if let returnVal = snapshot.value as? [String: Any] {
+                if let returnVal = snapshot.value as? Any {
                     withBlock(returnVal)
                 }
+            } else {
+                //throw error
             }
         })
         { (error) in
             print(error.localizedDescription)
         }
-        
+
     }
     
-    /*
     /**
      * queryByFieldContains: compares values for each FIELDNAME to see
      * they contain the given VALUE
@@ -43,33 +49,23 @@ class FirebaseUtils {
      * @params fieldName (String), ref (FIRDatabaseReference), inputValue (NSObject)
      * @return array of children that contain VALUE
      */
-    func queryByFieldContains(fieldName : String, ref : FIRDatabaseReference, inputValue : String) {
-        ref.child(fieldName).observeSingleEvent(of: .value, with: { (snapshot) in
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
-            } else {
-                var results : [NSObject] = []
-                
-                // THE CODE BELOW I'M NOT SURE OF
-                // IM UNCLEAR IF THIS FUNCTION WANTS TO CHECK THE CHILDREN OF THE SNAPSHOT
-                // OR IF IT WANTS TO CHECK IF VALUE PROPERTIES EXIST
-                
-                let enumerator = snapshot.children
-                while let snapshotValue = enumerator.nextObject() as? FIRDataSnapshot {
-                    if snapshotValue.hasChild(inputValue) {
-                        results.append(snapshotValue)
+   
+    func queryByStringContains(fieldName : String, ref : FIRDatabaseReference, inputValue : String, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? String {
+                        if (fieldNameValue.contains(inputValue)) {
+                            results.append(childSnapshotValue)
+                        }
                     }
                 }
-                
-                
-//                for childSnapshot in snapshot.children {
-//                    let snapshotValue = childSnapshot.value as! NSDictionary
-//                    if snapshotValue.contains(inputValue) {
-//                        results.append(snapshotValue)
-//                    }
-//                }
-                
-                // FIGURE OUT HOW TO RETURN RESULTS ARRAY
+                withBlock(results)
+            } else {
+                //throw error
             }
         }) { (error) in
             print(error.localizedDescription)
@@ -82,50 +78,95 @@ class FirebaseUtils {
      * if that value is contained in the list of INPUTVALUES
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValues (NSArray)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValues (Any)
      * @return array of children that contain VALUE
      */
-    func queryByListContains(fieldName : String, ref : FIRDatabaseReference, inputValues : NSArray) {
-        ref.child(fieldName).observeSingleEvent(of: .value, with: { (snapshot) in
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
-            } else {
-                var results : [NSObject] = []
-                for childSnapshot in snapshot.children {
-//                    let snapshotValue = (childSnapshot as AnyObject).value as! NSDictionary
-//                    if inputValues.contains(snapshotValue) {
-//                        results.append(snapshotValue)
-//                    }
+    
+    func queryByListContains(fieldName : String, ref : FIRDatabaseReference, inputValue : Any, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? [NSObject] {
+                        if (fieldNameValue.contains(inputValue as! NSObject)) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
                 }
-                // FIGURE OUT HOW TO RETURN RESULTS ARRAY
+                withBlock(results)
+            } else {
+                //throw error
             }
         }) { (error) in
             print(error.localizedDescription)
         }
     }
     
-    
     /**
-     * queryByEqualTo: compare values for each FIELDNAME
-     * to see if that value is equal to INPUTVALUE
+     * queryByListContainsSublist: compares values for each FIELDNAME to see
+     * if that value contains all the elements of INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (NSObject)
-     * @return array of children that are equal to the INPUTVALUE
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValues (NSArray)
+     * @return array of children that contain VALUE
      */
-    func queryByEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : NSObject) {
-        ref.child(fieldName).observeSingleEvent(of: .value, with: { (snapshot) in
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
-            } else {
-                var results : [NSObject] = []
-                for childSnapshot in snapshot.children {
-//                    let snapshotValue = (childSnapshot as AnyObject).value as! NSDictionary
-//                    if snapshotValue.equals(inputValue) {
-//                        results.append(snapshotValue)
-//                    }
+    
+    func queryByListContainsSublist(fieldName : String, ref : FIRDatabaseReference, inputValue : [Any], withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? [NSObject] {
+                        var containsAll = true
+                        for element in inputValue {
+                            if (!fieldNameValue.contains(element as! NSObject)) {
+                                containsAll = false
+                            }
+                        }
+                        if (containsAll) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
                 }
-                // FIGURE OUT HOW TO RETURN RESULTS ARRAY
+                withBlock(results)
+            } else {
+                //throw error
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
+
+    
+    /**
+     * queryByNotEqualTo: compare values for each FIELDNAME
+     * to see if that value is not equal to INPUTVALUE
+     * - ASYNC
+     *
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @return array of children that are not equal to the INPUTVALUE
+     */
+    
+    func queryByNotEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : String, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? String {
+                        if (fieldNameValue != inputValue as? String) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
+                }
+                withBlock(results)
+            } else {
+                //throw error
             }
         }) { (error) in
             print(error.localizedDescription)
@@ -137,22 +178,58 @@ class FirebaseUtils {
      * to see if that value is not equal to INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (NSObject)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
      * @return array of children that are not equal to the INPUTVALUE
      */
-    func queryByNotEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : NSObject) {
-        ref.child(fieldName).observeSingleEvent(of: .value, with: { (snapshot) in
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
-            } else {
-                var results : [NSObject] = []
-                for childSnapshot in snapshot.children {
-//                    let snapshotValue = (childSnapshot as AnyObject).value as! NSDictionary
-//                    if !(snapshotValue.equals(inputValue)) {
-//                        results.append(snapshotValue)
-//                    }
+    
+    func queryByNotEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : Float, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? Float {
+                        if (fieldNameValue != inputValue as? Float) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
                 }
-                // FIGURE OUT HOW TO RETURN RESULTS ARRAY
+                withBlock(results)
+            } else {
+                //throw error
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
+
+    
+    /**
+     * queryByLessThan: compare values for each FIELDNAME
+     * to see if that value is less than INPUTVALUE
+     * - ASYNC
+     *
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @return array of children that are less than the INPUTVALUE
+     */
+    
+    func queryByLessThan(fieldName : String, ref : FIRDatabaseReference, inputValue : String, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? String {
+                        if (fieldNameValue < (inputValue as? String)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
+                }
+                withBlock(results)
+            } else {
+                //throw error
             }
         }) { (error) in
             print(error.localizedDescription)
@@ -164,77 +241,235 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (NSObject)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
      * @return array of children that are less than the INPUTVALUE
      */
-    func queryByLessThan(fieldName : String, ref : FIRDatabaseReference, inputValue : NSObject) {
-        ref.child(fieldName).observeSingleEvent(of: .value, with: { (snapshot) in
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
-            } else {
-                var results : [NSObject] = []
-                for childSnapshot in snapshot.children {
-//                    let snapshotValue = (childSnapshot as AnyObject).value as! NSDictionary
-//                    if (snapshotValue < inputValue) {
-//                        results.append(snapshotValue)
-//                    }
+    
+    func queryByLessThan(fieldName : String, ref : FIRDatabaseReference, inputValue : Float, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? Float {
+                        if (fieldNameValue < (inputValue as? Float)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
                 }
-                // FIGURE OUT HOW TO RETURN RESULTS ARRAY
+                withBlock(results)
+            } else {
+                //throw error
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
+
+    /**
+     * queryByLessThanOrEqualTo: compare values for each FIELDNAME
+     * to see if that value is less than INPUTVALUE
+     * - ASYNC
+     *
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @return array of children that are less than or equal to the INPUTVALUE
+     */
+    
+    func queryByLessThanOrEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : String, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? String {
+                        if (fieldNameValue <= (inputValue as? String)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
+                }
+                withBlock(results)
+            } else {
+                //throw error
             }
         }) { (error) in
             print(error.localizedDescription)
         }
     }
     
+    /**
+     * queryByLessThanOrEqualTo: compare values for each FIELDNAME
+     * to see if that value is less than INPUTVALUE
+     * - ASYNC
+     *
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
+     * @return array of children that are less than or equal to the INPUTVALUE
+     */
+    
+    func queryByLessThanOrEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : Float, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? Float {
+                        if (fieldNameValue <= (inputValue as? Float)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
+                }
+                withBlock(results)
+            } else {
+                //throw error
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
+
+    /**
+     * queryByGreaterThan: compare values for each FIELDNAME
+     * to see if that value is less than INPUTVALUE
+     * - ASYNC
+     *
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @return array of children that are greater than the INPUTVALUE
+     */
+    
+    func queryByGreaterThan(fieldName : String, ref : FIRDatabaseReference, inputValue : String, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? String {
+                        if (fieldNameValue > (inputValue as? String)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
+                }
+                withBlock(results)
+            } else {
+                //throw error
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
     
     /**
      * queryByGreaterThan: compare values for each FIELDNAME
-     * to see if that value is greater than INPUTVALUE
+     * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (NSObject)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
      * @return array of children that are greater than the INPUTVALUE
      */
-    func queryByGreaterThan(fieldName : String, ref : FIRDatabaseReference, inputValue : NSObject) {
-        ref.child(fieldName).observeSingleEvent(of: .value, with: { (snapshot) in
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
-            } else {
-                var results : [NSObject] = []
-                for childSnapshot in snapshot.children {
-//                    let snapshotValue = (childSnapshot as AnyObject).value as! NSDictionary
-//                    if (snapshotValue > inputValue) {
-//                        results.append(snapshotValue)
-//                    }
+    
+    func queryByGreaterThan(fieldName : String, ref : FIRDatabaseReference, inputValue : Float, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? Float {
+                        if (fieldNameValue > (inputValue as? Float)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
                 }
-                // FIGURE OUT HOW TO RETURN RESULTS ARRAY
+                withBlock(results)
+            } else {
+                //throw error
             }
         }) { (error) in
             print(error.localizedDescription)
         }
     }
-    
     
     /**
-     * queryByFileEquals: compare urls for each FIELDNAME, 
-     * downloads the file at that url in bytes, and then compares those bytes to FILEBYTES
+     * queryByGreaterThanOrEqualTo: compare values for each FIELDNAME
+     * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), fileBytes (???)
-     * @return ??? NOT SURE WHAT THIS RETURNS
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @return array of children that are greater than or equal to the INPUTVALUE
      */
-    func queryByFileEquals(fieldName : String, ref : FIRDatabaseReference, fileBytes : NSData) {
-        ref.child(fieldName).observeSingleEvent(of: .value, with: { (snapshot) in
-            if (!snapshot.exists()) {
-                // REPLACE THIS WITH RETURN SOMETHING NIL
+    
+    func queryByGreaterThanOrEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : String, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? String {
+                        if (fieldNameValue >= (inputValue as? String)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
+                }
+                withBlock(results)
             } else {
-                // NOT SURE THE TYPE OF THE FILEBYTES TO BE PASSED IN --> NSDATA OR BYTE[] OR ????
-                // NO IDEA HOW TO Do THIS
+                //throw error
             }
         }) { (error) in
             print(error.localizedDescription)
         }
-        
     }
-    */
+    
+    /**
+     * queryByGreaterThanOrEqualTo: compare values for each FIELDNAME
+     * to see if that value is less than INPUTVALUE
+     * - ASYNC
+     *
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
+     * @return array of children that are greater than or equal to the INPUTVALUE
+     */
+    
+    func queryByGreaterThanOrEqualTo(fieldName : String, ref : FIRDatabaseReference, inputValue : Float, withBlock: @escaping ([NSObject]) -> Void) {
+        assertRef(ref: ref)
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                var results : [NSDictionary] = []
+                for childSnapshot in snapshot.children.allObjects as! [FIRDataSnapshot] {
+                    let childSnapshotValue = childSnapshot.value as! NSDictionary
+                    if let fieldNameValue = childSnapshotValue[fieldName] as? Float {
+                        if (fieldNameValue >= (inputValue as? Float)!) {
+                            results.append(childSnapshotValue)
+                        }
+                    }
+                }
+                withBlock(results)
+            } else {
+                //throw error
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
+    
+    private func assertRef(ref : FIRDatabaseReference) {
+        ref.observeSingleEvent(of: .value, with: { (snapshot) in
+            if (snapshot.exists()) {
+                if let refValue = snapshot.value as? NSDictionary {
+                    for key in refValue {
+                        if let value = refValue[key] as? NSDictionary {
+                            //pass
+                        } else {
+                            //throw error
+                        }
+                    }
+                } else {
+                    //throw error
+                }
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
 }

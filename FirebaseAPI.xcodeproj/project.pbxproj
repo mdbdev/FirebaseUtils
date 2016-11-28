@@ -249,7 +249,7 @@
 				TargetAttributes = {
 					0A372D531DDD76D800269FF2 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = WAS7569CL5;
+						DevelopmentTeam = A3LLN6N3LJ;
 						ProvisioningStyle = Automatic;
 					};
 					0A372D671DDD76D800269FF2 = {
@@ -599,7 +599,7 @@
 			baseConfigurationReference = C839D947EDA9C7BBC760D1BC /* Pods-FirebaseAPI.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = WAS7569CL5;
+				DEVELOPMENT_TEAM = A3LLN6N3LJ;
 				INFOPLIST_FILE = FirebaseAPI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.mobiledevsberkeley.FirebaseAPI;
@@ -613,7 +613,7 @@
 			baseConfigurationReference = 43883BECB11A38AD07146DE6 /* Pods-FirebaseAPI.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = WAS7569CL5;
+				DEVELOPMENT_TEAM = A3LLN6N3LJ;
 				INFOPLIST_FILE = FirebaseAPI/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.mobiledevsberkeley.FirebaseAPI;

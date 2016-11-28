@@ -26,17 +26,16 @@ class ViewController: UIViewController {
         // QUERYBYID example
         let ref = FIRDatabase.database().reference(withPath: "users")
         let firebaseUtils = FirebaseUtils()
-        let block = { dict -> Void in
-            print(dict)
+        let block = { object -> Void in
+            print(object)
         }
-        firebaseUtils.queryById(id: "2", ref: ref, withBlock: block)
+        firebaseUtils.queryByStringContains(fieldName: "image", ref: ref, inputValue: "https://www.facebook.com/photo.php?fbid=896520063825211&set=a.112631992214026.22144.100004016785310&type=3&source=11", withBlock: block)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
+    
 }
 
