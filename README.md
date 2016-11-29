@@ -3,7 +3,7 @@
 
 This is a simple Swift class that provides easy methods to query data from your Firebase Database.
 
-This library allows users to treat their default tree structure database in Firebase as a relational database (similar to the useage of Parse).
+This library allows users to treat their default tree structure database in Firebase as a relational database (similar to the usage of Parse).
 
 All that is needed is to create your FIRDatabaseReference then pass it into one of our functions to retrieve your desired data. 
 
