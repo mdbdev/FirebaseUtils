@@ -51,7 +51,7 @@ Create a variable to reference our FirebaseUtils:
 let firebaseUtils = FirebaseUtils()
 ```
 
-Create a block variable in which you determine what you want to do with the resulting object (print, return, etc.)
+Create a block variable in which you determine what you want to do with the resulting object, such as print, return, etc.
 (in this example, the object is being printed):
 ```swift
 let block = { object -> Void in
