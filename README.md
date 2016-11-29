@@ -2,6 +2,9 @@
 # FirebaseUtils
 
 This is a simple Swift class that provides easy methods to query data from your Firebase Database.
+
+This library allows users to treat their default tree structure database in Firebase as a relational database (similar to the useage of Parse).
+
 All that is needed is to create your FIRDatabaseReference then pass it into one of our functions to retrieve your desired data. 
 
 It includes the following query methods:
@@ -47,11 +50,18 @@ Create a variable to reference our FirebaseUtils:
 ```swift
 let firebaseUtils = FirebaseUtils()
 ```
-Use that variable to call any one of our functions above (in this example, queryByStringContains is being called):
+
+Create a block variable in which you determine what you want to do with the resulting object (print, return, etc.)
+(in this example, the object is being printed):
 ```swift
 let block = { object -> Void in
             print(object)
         }
+```
+
+Use the firebaseUtils variable and block variable as a parameter to call any one of our functions above 
+(in this example, queryByStringContains is being called):
+```swift
 firebaseUtils.queryByStringContains(fieldName: "image", ref: ref, inputValue: "https://www.example.com", withBlock: block)
 ```
 ## More Info
