@@ -54,6 +54,9 @@ let block = { object -> Void in
         }
 firebaseUtils.queryByStringContains(fieldName: "image", ref: ref, inputValue: "https://www.example.com", withBlock: block)
 ```
+## More Info
+
+View our FirebaseUtils.swift file for more specifics on each function, the required parameters, and what results will be returned. 
 
 ## Support
 
