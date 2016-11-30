@@ -17,14 +17,14 @@ class FirebaseUtils {
     }
     
     /** 
-     * queryById 
+     * queryById: takes in an id as a string and returns node that contains that id
      * - ASYNC
      *
-     * @params id (String), ref (FIRDatabaseReference), childType (AnyClass) // FIGURE OUT TYPE THING
+     * @params id (String), ref (FIRDatabaseReference), withBlock (block) 
      * @return JSON object with id as its parent
      */
     
-    func queryById(id : String, ref : FIRDatabaseReference, withBlock: @escaping (Any) -> Void) {
+    func queryById(id : String, ref : FIRDatabaseReference, withBlock: @escaping (Any) -> Void, errorBlock: @escaping (FirebaseUtilsError) -> Void) {
         assertRef(ref: ref)
         ref.child(id).observeSingleEvent(of: .value, with: { (snapshot) in
             if (snapshot.exists()) {
@@ -32,7 +32,7 @@ class FirebaseUtils {
                     withBlock(returnVal)
                 }
             } else {
-                //throw error
+                errorBlock(.QueryError)
             }
         })
         { (error) in
@@ -42,11 +42,11 @@ class FirebaseUtils {
     }
     
     /**
-     * queryByFieldContains: compares values for each FIELDNAME to see
+     * queryByStringContains: compares values for each FIELDNAME to see
      * they contain the given VALUE
      *  - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (NSObject)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String), withBlock (block)
      * @return array of children that contain VALUE
      */
    
@@ -78,7 +78,7 @@ class FirebaseUtils {
      * if that value is contained in the list of INPUTVALUES
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValues (Any)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValues (Any), withBlock (block)
      * @return array of children that contain VALUE
      */
     
@@ -109,7 +109,7 @@ class FirebaseUtils {
      * if that value contains all the elements of INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValues (NSArray)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValues (NSArray), withBlock (block)
      * @return array of children that contain VALUE
      */
     
@@ -147,7 +147,7 @@ class FirebaseUtils {
      * to see if that value is not equal to INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String), withBlock(block)
      * @return array of children that are not equal to the INPUTVALUE
      */
     
@@ -178,7 +178,7 @@ class FirebaseUtils {
      * to see if that value is not equal to INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float), withBlock (block)
      * @return array of children that are not equal to the INPUTVALUE
      */
     
@@ -210,7 +210,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String), withBlock (block)
      * @return array of children that are less than the INPUTVALUE
      */
     
@@ -241,7 +241,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float), withBlock (block)
      * @return array of children that are less than the INPUTVALUE
      */
     
@@ -272,7 +272,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String), withBlock (block)
      * @return array of children that are less than or equal to the INPUTVALUE
      */
     
@@ -303,7 +303,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float), withBlock (block)
      * @return array of children that are less than or equal to the INPUTVALUE
      */
     
@@ -334,7 +334,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String), withBlock (block)
      * @return array of children that are greater than the INPUTVALUE
      */
     
@@ -365,7 +365,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float), withBlock (block)
      * @return array of children that are greater than the INPUTVALUE
      */
     
@@ -396,7 +396,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (String), withBlock (block)
      * @return array of children that are greater than or equal to the INPUTVALUE
      */
     
@@ -427,7 +427,7 @@ class FirebaseUtils {
      * to see if that value is less than INPUTVALUE
      * - ASYNC
      *
-     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float)
+     * @params fieldName (String), ref (FIRDatabaseReference), inputValue (Float), withBlock (block)
      * @return array of children that are greater than or equal to the INPUTVALUE
      */
     
