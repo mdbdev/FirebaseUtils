@@ -21,15 +21,19 @@ class ViewController: UIViewController {
          * EXAMPLES ON HOW TO USE FIREBASEUTILS QUERY METHODS
          */
         
-        FIRAuth.auth()?.signIn(withEmail: "mudit@google.com", password: "fuckyou", completion: nil)
+        FIRAuth.auth()?.signIn(withEmail: "your_email", password: "your_password_here", completion: nil)
         print("Sign in Successful!")
         // QUERYBYID example
-        let ref = FIRDatabase.database().reference(withPath: "users")
+        let ref = FIRDatabase.database().reference(withPath: "cities")
         let firebaseUtils = FirebaseUtils()
         let block = { object -> Void in
             print(object)
         }
-        firebaseUtils.queryByStringContains(fieldName: "image", ref: ref, inputValue: "https://www.facebook.com/photo.php?fbid=896520063825211&set=a.112631992214026.22144.100004016785310&type=3&source=11", withBlock: block)
+        let errorBlock = { error
+            -> Void in
+            print(error)
+        }
+        firebaseUtils.queryById(id: "380", ref: ref, withBlock: block, errorBlock: errorBlock)
     }
 
     override func didReceiveMemoryWarning() {
