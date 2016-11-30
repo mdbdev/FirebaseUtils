@@ -1,5 +1,9 @@
-
 # FirebaseUtils
+
+[![CI Status](http://img.shields.io/travis/Christine Munar/FirebaseUtils.svg?style=flat)](https://travis-ci.org/Christine Munar/FirebaseUtils)
+[![Version](https://img.shields.io/cocoapods/v/FirebaseUtils.svg?style=flat)](http://cocoapods.org/pods/FirebaseUtils)
+[![License](https://img.shields.io/cocoapods/l/FirebaseUtils.svg?style=flat)](http://cocoapods.org/pods/FirebaseUtils)
+[![Platform](https://img.shields.io/cocoapods/p/FirebaseUtils.svg?style=flat)](http://cocoapods.org/pods/FirebaseUtils)
 
 This is a simple Swift class that provides easy methods to query data from your Firebase Database.
 
@@ -18,15 +22,17 @@ It includes the following query methods:
 - queryByGreaterThan
 - queryByGreaterThanOrEqualTo
 
-## Installation with CocoaPods
+## Installation
 
-Install FirebaseUtils with: [CocoaPods](http://cocoapods.org)
-
-### Podfile
+FirebaseUtils is available through [CocoaPods](http://cocoapods.org). To install
+it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'FirebaseUtils'
+pod "FirebaseUtils"
 ```
+
+## Required
+Must install Firebase before use.
 
 ## How to use
 First import Firebase and FirebaseAuth to your selected ViewController.
@@ -53,8 +59,8 @@ Create a block variable in which you determine what you want to do with the resu
 (in this example, the object is being printed):
 ```swift
 let block = { object -> Void in
-            print(object)
-        }
+print(object)
+}
 ```
 
 Use the firebaseUtils variable and block variable as a parameter to call any one of our functions above 
@@ -69,3 +75,9 @@ View our FirebaseUtils.swift file for more specifics on each function, the requi
 ## Support
 
 Supports iOS 8 and above. Xcode 7.0 is required to build the latest code written in Swift 3.0.
+
+## License
+
+FirebaseUtils is available under the MIT license. See the LICENSE file for more info.
+
+
