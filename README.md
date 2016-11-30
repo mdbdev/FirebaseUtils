@@ -25,9 +25,7 @@ Install FirebaseUtils with: [CocoaPods](http://cocoapods.org)
 ### Podfile
 
 ```ruby
-use_frameworks!
-
-pod 'FirebaseUtils', '~> 1.0.14'
+pod 'FirebaseUtils'
 ```
 
 ## How to use
