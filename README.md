@@ -24,6 +24,8 @@ It includes the following query methods:
 
 ## Installation
 
+Makre sure you're on the correct repo branch: 'FirebaseUtilsCocoaPod'
+
 FirebaseUtils is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
