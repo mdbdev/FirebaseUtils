@@ -20,6 +20,8 @@ It includes the following query methods:
 
 ## Installation with CocoaPods
 
+Makre sure you're on the correct repo branch: 'FirebaseUtilsCocoaPod' 
+
 Install FirebaseUtils with: [CocoaPods](http://cocoapods.org)
 
 ### Podfile
